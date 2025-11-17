@@ -1,0 +1,42 @@
+#include "tet.h"
+
+
+/*
+ * timestamp 100% верный
+ * api key & secret 100% верные
+ * hmac256() 100% верный
+ * https tls 100% верное
+ * входные параметры для hmac 100% верные
+ * hex переведённый от hmac 100% верный
+*/
+
+int createSignature(const unsigned char *const pApiSecret, const uint16_t apiSecretLen, const char *const pMethod, const char *const pPath, const char *const pBody, unsigned char *const pResult, uint64_t *const pTimestamp)
+{
+	struct timespec tp = {};
+	clock_gettime(CLOCK_REALTIME, &tp);
+
+	const uint64_t timestamp_in_milliseconds = (tp.tv_sec * 1'000) + (tp.tv_nsec / 1'000'000) + 56'000;// pionex timestamp different on ~56000 milliseconds (or timestamp on my computer wrong, idk.)
+	*pTimestamp = timestamp_in_milliseconds;
+
+	const uint16_t hmacInputDataLen = 256;
+	unsigned char* hmacInputData = malloc(sizeof(*hmacInputData) * hmacInputDataLen);
+
+	snprintf(hmacInputData, hmacInputDataLen, "%s%stimestamp=%ld%s\0", pMethod, pPath, timestamp_in_milliseconds, pBody);
+	printf("hmac input data: %s\n", hmacInputData);
+
+	unsigned char hmacResult[EVP_MAX_MD_SIZE];
+	unsigned int hmacResultLen = 0;
+
+	HMAC(EVP_sha256(), pApiSecret, apiSecretLen, hmacInputData, strlen(hmacInputData), hmacResult, &hmacResultLen);
+	free(hmacInputData);
+
+	uint8_t itr = 0;
+	for (uint8_t i = 0; i < hmacResultLen; i++)
+	{
+		sprintf(&pResult[itr], "%02x", hmacResult[i]);
+		itr += 2;
+	}
+	pResult[itr] = '\0';
+
+	return 0;
+}
