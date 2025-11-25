@@ -1,15 +1,6 @@
 #include "tet.h"
 
 
-/*
- * timestamp 100% верный
- * api key & secret 100% верные
- * hmac256() 100% верный
- * https tls 100% верное
- * входные параметры для hmac 100% верные
- * hex переведённый от hmac 100% верный
-*/
-
 int createSignature(const unsigned char *const pApiSecret, const uint16_t apiSecretLen, const char *const pMethod, const char *const pPath, const char *const pBody, unsigned char *const pResult, uint64_t *const pTimestamp)
 {
 	struct timespec tp = {};
@@ -21,7 +12,7 @@ int createSignature(const unsigned char *const pApiSecret, const uint16_t apiSec
 	const uint16_t hmacInputDataLen = 256;
 	unsigned char* hmacInputData = malloc(sizeof(*hmacInputData) * hmacInputDataLen);
 
-	snprintf(hmacInputData, hmacInputDataLen, "%s%stimestamp=%ld%s\0", pMethod, pPath, timestamp_in_milliseconds, pBody);
+	snprintf(hmacInputData, hmacInputDataLen, "%s%s?timestamp=%ld%s\0", pMethod, pPath, timestamp_in_milliseconds, pBody);
 	printf("hmac input data: %s\n", hmacInputData);
 
 	unsigned char hmacResult[EVP_MAX_MD_SIZE];

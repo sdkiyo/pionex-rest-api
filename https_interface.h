@@ -6,21 +6,11 @@
 #include <stdint.h>
 
 
-typedef struct HttpHeaderCreateInfo {
-	char*		pMethod;
-	char*		pPath;
-	char*		pVersion;
-	char*		pHead;
-	char*		pBody;
-} HttpHeaderCreateInfo;
-
-
 typedef struct HttpMultipleHeadersCreateInfo {
-	char**		ppHeads;
-	char**		ppJsons;
-	uint8_t		headersCount;
+	const char *const *	ppHeads;
+	const char *const *	ppJsons;
+	uint8_t			headersCount;
 } HttpMultipleHeadersCreateInfo;
-
 
 typedef struct HttpMultipleHeaders {
 	char**		ppHeaders;
@@ -29,13 +19,21 @@ typedef struct HttpMultipleHeaders {
 } HttpMultipleHeaders;
 
 
-typedef int (*PFN_httpsClientConnect)(const char *const pHostname, const HttpMultipleHeaders *const pSentHeaders, HttpMultipleHeaders *const pServerResponses, const uint16_t serverResponseMaxLength);
-typedef void (*PFN_httpCreateMultipleHeaders)(const HttpMultipleHeadersCreateInfo *const pMultipleHeadersCreateInfo, HttpMultipleHeaders* pMultipleHeaders);
+typedef int (*PFN_httpsClientConnect)(
+	const char *const			pHostname,
+	const HttpMultipleHeaders *const	pSentHeaders,
+	int (responseCallback)(const char *const, const uint16_t, void*), /* <- function pointer */
+	void*					pUserData,
+	const uint16_t				serverResponseMaxLen);
 
 
-static PFN_httpsClientConnect httpsClientConnect;
-static PFN_httpCreateMultipleHeaders httpCreateMultipleHeaders;
+typedef void (*PFN_httpCreateMultipleHeaders)(
+	const HttpMultipleHeadersCreateInfo *const	pMultipleHeadersCreateInfo,
+	HttpMultipleHeaders*				pMultipleHeaders);
 
+
+static PFN_httpsClientConnect			httpsClientConnect;
+static PFN_httpCreateMultipleHeaders		httpCreateMultipleHeaders;
 
 
 #endif
