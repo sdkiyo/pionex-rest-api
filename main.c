@@ -13,7 +13,8 @@ int responseCallback(const char *const pServerResponse, const uint16_t pResponse
 	printf("userData: %s\n", (char*)pUserData);
 	printf("response len: %d\n", pResponseLen);
 	printf(BLUE "server responce start: \n" RESET_COLOR "%s" BLUE "server responce end\n" RESET_COLOR, pServerResponse);
-	return 0;}
+	return 0;
+}
 
 
 int main(const int argumentCount, const char *const *const argumentValue)

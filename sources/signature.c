@@ -1,7 +1,7 @@
-#include "tet.h"
+#include <signature.h>
 
 
-int createSignature(const unsigned char *const pApiSecret, const uint16_t apiSecretLen, const char *const pMethod, const char *const pPath, const char *const pBody, unsigned char *const pResult, uint64_t *const pTimestamp)
+int createSignature(const unsigned char *const pApiSecret, const uint8_t apiSecretLen, const char *const pMethod, const char *const pPath, const char *const pBody, unsigned char *const pResult, uint64_t *const pTimestamp)
 {
 	struct timespec tp = {};
 	clock_gettime(CLOCK_REALTIME, &tp);
