@@ -1,0 +1,48 @@
+ninja_required_version = 1.13.2
+
+compiler = clang
+compile_flags = -march=native -O2 -pipe -flto -std=c23 -Wall -Wextra -Wpedantic -Wfloat-conversion -Wconversion -Wdeprecated-declarations -Wshadow -Wformat -Wvla -Wformat-security -Wformat=2 -Wnull-dereference -Wstack-protector -fdiagnostics-color=always -Wcast-qual -Wconditional-uninitialized -Wtautological-constant-in-range-compare -Wcomma -Wassign-enum -Wbad-function-cast -Wpointer-arith -Widiomatic-parentheses -Wthread-safety -Wswitch-default -Wundef -Warray-bounds-pointer-arithmetic -Wshift-sign-overflow -Wempty-body -Wsign-conversion -Wstrict-prototypes
+compile_shared_flags = -fPIC
+link_flags = -flto
+link_shared_flags = -shared -flto
+
+
+sources_path = ../../src
+build_directory = build
+output_name = test1
+
+
+# rules
+rule compile
+  command = $compiler $INCLUDES $compile_flags -c $in -o $out
+
+rule compile_shared
+  command = $compiler $INCLUDES $compile_flags $compile_shared_flags -c $in -o $out
+
+rule link
+  command = $compiler $link_flags $in -o $out $FLAGS
+
+rule link_shared
+  command = $compiler $link_shared_flags $in -o $out $FLAGS
+
+
+# object files
+build $build_directory/main.o: compile main.c
+  INCLUDES = -I../../include
+
+build $build_directory/createSignature.o: compile_shared $sources_path/createSignature.c
+  INCLUDES = -I../../include
+
+build $build_directory/getBalanceCallback.o: compile_shared $sources_path/getBalanceCallback.c
+  INCLUDES = -I../../include
+
+
+# output files
+build $build_directory/$output_name: link $build_directory/main.o
+
+build $build_directory/libPionexRestApi.so: link_shared $build_directory/createSignature.o $build_directory/getBalanceCallback.o
+  FLAGS = -L/usr/lib64 -lssl -lcrypto
+
+
+default $build_directory/$output_name
+default $build_directory/libPionexRestApi.so
